@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import styled from "styled-components";
 
 export const StyledLink = styled(Link)`
-  display: flex;
+  display: inline-flex;
   align-items: center;
   margin-bottom: 15px;
   font-weight: 400;  
