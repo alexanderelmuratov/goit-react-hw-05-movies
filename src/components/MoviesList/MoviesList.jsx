@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useLocation } from "react-router-dom";
 import PropTypes from 'prop-types';
 import { GiFilmSpool } from 'react-icons/gi';
+import { AiFillStar } from 'react-icons/ai';
+import { MdWatchLater, MdOutlineWatchLater, MdNotInterested, MdOutlineNotInterested } from 'react-icons/md';
 import { getMovieGenres } from 'services/moviesApi';
 import { 
   StyledList, 
@@ -12,12 +14,16 @@ import {
   MovieTitle, 
   MovieMeta,
   BadgesContainer, 
-  Badge 
+  Badge,
+  ButtonsContainer,
+  ActionBtn
 } from "./MoviesList.styled";
 
 export const MoviesList = ({ movies }) => {
   const location = useLocation();
   const [genresMap, setGenresMap] = useState({});
+  const [watchLater, setWatchLater] = useState(() => JSON.parse(localStorage.getItem('watchLater')) || []);
+  const [notInterested, setNotInterested] = useState(() => JSON.parse(localStorage.getItem('notInterested')) || []);
 
   useEffect(() => {
     const fetchGenres = async () => {
@@ -35,9 +41,27 @@ export const MoviesList = ({ movies }) => {
     fetchGenres();
   }, []);
 
+  const toggleWatchLater = (e, id) => {
+    e.preventDefault();
+    let next = watchLater.includes(id) ? watchLater.filter(i => i !== id) : [...watchLater, id];
+    setWatchLater(next);
+    localStorage.setItem('watchLater', JSON.stringify(next));
+    window.dispatchEvent(new Event('moviesListUpdated'));
+  };
+
+  const toggleNotInterested = (e, id) => {
+    e.preventDefault();
+    let next = notInterested.includes(id) ? notInterested.filter(i => i !== id) : [...notInterested, id];
+    setNotInterested(next);
+    localStorage.setItem('notInterested', JSON.stringify(next));
+    window.dispatchEvent(new Event('moviesListUpdated'));
+  };
+
+  const visibleMovies = movies.filter(movie => !notInterested.includes(movie.id));
+
   return (
     <StyledList>
-      {movies.map(movie => (
+      {visibleMovies.map(movie => (
         <StyledListItem key={movie.id}>
           <StyledLink to={`/movies/${movie.id}`} state={{ from: location }}>
             <MoviePoster 
@@ -50,7 +74,10 @@ export const MoviesList = ({ movies }) => {
                 {movie.title}
               </MovieTitle>
               <MovieMeta>
-                <span>Rating: {movie.popularity}</span>
+                <span>
+                  <AiFillStar style={{ color: '#ffb400', marginRight: '4px' }} />
+                  {movie.popularity ? movie.popularity.toFixed(1) : 'N/A'}
+                </span>
                 <span>Year: {movie.release_date ? movie.release_date.substring(0,4) : 'N/A'}</span>
               </MovieMeta>
               {movie.genre_ids && movie.genre_ids.length > 0 && (
@@ -60,6 +87,23 @@ export const MoviesList = ({ movies }) => {
                   ))}
                 </BadgesContainer>
               )}
+              <ButtonsContainer>
+                <ActionBtn 
+                  active={watchLater.includes(movie.id)} 
+                  onClick={(e) => toggleWatchLater(e, movie.id)}
+                >
+                  {watchLater.includes(movie.id) ? <MdWatchLater size={16} /> : <MdOutlineWatchLater size={16} />}
+                  {watchLater.includes(movie.id) ? 'In Watch Later' : 'Watch Later'}
+                </ActionBtn>
+                <ActionBtn 
+                  danger 
+                  active={notInterested.includes(movie.id)}
+                  onClick={(e) => toggleNotInterested(e, movie.id)}
+                >
+                  {notInterested.includes(movie.id) ? <MdNotInterested size={16} /> : <MdOutlineNotInterested size={16} />}
+                  Not Interested
+                </ActionBtn>
+              </ButtonsContainer>
             </MovieInfo>
           </StyledLink>
         </StyledListItem>

@@ -13,7 +13,7 @@ const FilterForm = styled.form`
   flex-wrap: wrap;
   align-items: center;
 
-  input, select {
+  input[type="text"], input[type="number"], select {
     padding: 10px 15px;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -24,6 +24,22 @@ const FilterForm = styled.form`
     &:focus {
       border-color: #ff6b01;
     }
+  }
+`;
+
+const CheckboxLabel = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  user-select: none;
+  
+  input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #ff6b01;
   }
 `;
 
@@ -57,6 +73,15 @@ export const HomePage = () => {
   const [searchTitle, setSearchTitle] = useState('');
   const [searchGenre, setSearchGenre] = useState('');
   const [searchYear, setSearchYear] = useState('');
+  const [showWatchLaterOnly, setShowWatchLaterOnly] = useState(false);
+  
+  const [updateTrigger, setUpdateTrigger] = useState(0);
+
+  useEffect(() => {
+    const handleUpdate = () => setUpdateTrigger(prev => prev + 1);
+    window.addEventListener('moviesListUpdated', handleUpdate);
+    return () => window.removeEventListener('moviesListUpdated', handleUpdate);
+  }, []);
 
   // Fetch genres once on mount
   useEffect(() => {
@@ -90,13 +115,17 @@ export const HomePage = () => {
   }, [page]);
 
   const filteredMovies = useMemo(() => {
+    const watchLater = JSON.parse(localStorage.getItem('watchLater')) || [];
+    
     return movies.filter(movie => {
+      if (showWatchLaterOnly && !watchLater.includes(movie.id)) return false;
+      
       const matchTitle = searchTitle === '' || movie.title.toLowerCase().includes(searchTitle.toLowerCase());
       const matchGenre = searchGenre === '' || (movie.genre_ids && movie.genre_ids.includes(Number(searchGenre)));
       const matchYear = searchYear === '' || (movie.release_date && movie.release_date.startsWith(searchYear));
       return matchTitle && matchGenre && matchYear;
     });
-  }, [movies, searchTitle, searchGenre, searchYear]);
+  }, [movies, searchTitle, searchGenre, searchYear, showWatchLaterOnly, updateTrigger]);
 
   const handleLoadMore = () => {
     setPage(prevPage => prevPage + 1);
@@ -128,6 +157,14 @@ export const HomePage = () => {
           value={searchYear}
           onChange={(e) => setSearchYear(e.target.value)}
         />
+        <CheckboxLabel>
+          <input 
+            type="checkbox" 
+            checked={showWatchLaterOnly}
+            onChange={(e) => setShowWatchLaterOnly(e.target.checked)}
+          />
+          Watch Later Only
+        </CheckboxLabel>
       </FilterForm>
 
       {movies.length !== 0 && <MoviesList movies={filteredMovies} />}

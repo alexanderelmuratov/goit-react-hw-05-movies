@@ -43,6 +43,7 @@ export const MovieInfo = styled.div`
   padding: 15px;
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
 `;
 
 export const MovieTitle = styled.h3`
@@ -66,6 +67,8 @@ export const MovieMeta = styled.div`
     background: #e0e0e0;
     padding: 2px 8px;
     border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
   }
 `;
 
@@ -82,4 +85,30 @@ export const Badge = styled.span`
   border-radius: 12px;
   font-size: 12px;
   font-weight: 500;
+`;
+
+export const ButtonsContainer = styled.div`
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+`;
+
+export const ActionBtn = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid ${props => props.danger ? '#ff4d4f' : '#1890ff'};
+  background-color: ${props => props.active ? (props.danger ? '#ff4d4f' : '#1890ff') : 'transparent'};
+  color: ${props => props.active ? 'white' : (props.danger ? '#ff4d4f' : '#1890ff')};
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    background-color: ${props => props.danger ? '#ff4d4f' : '#1890ff'};
+    color: white;
+  }
 `;
