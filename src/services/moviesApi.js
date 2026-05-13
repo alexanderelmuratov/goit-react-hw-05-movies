@@ -28,6 +28,11 @@ export const getMovieReviews = async (movieId) => {
   return response.data;
 };
 
+export const getMovieGenres = async () => {
+  const response = await axios.get(`/genre/movie/list?language=en&api_key=${API_KEY}`);
+  return response.data;
+};
+
 // ================================
 // список самых популярных фильмов на сегодня для создания коллекции на главной странице
 // https://api.themoviedb.org/3/trending/movie/week?api_key=b4f947b22bfa1d671304279be6575e1f
