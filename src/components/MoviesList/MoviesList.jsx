@@ -10,6 +10,7 @@ import {
   MoviePoster, 
   MovieInfo, 
   MovieTitle, 
+  MovieMeta,
   BadgesContainer, 
   Badge 
 } from "./MoviesList.styled";
@@ -48,6 +49,10 @@ export const MoviesList = ({ movies }) => {
                 <GiFilmSpool style={{ width: 15, height: 15, marginRight: '10px'}} />
                 {movie.title}
               </MovieTitle>
+              <MovieMeta>
+                <span>Rating: {movie.popularity}</span>
+                <span>Year: {movie.release_date ? movie.release_date.substring(0,4) : 'N/A'}</span>
+              </MovieMeta>
               {movie.genre_ids && movie.genre_ids.length > 0 && (
                 <BadgesContainer>
                   {movie.genre_ids.map(id => genresMap[id] && (

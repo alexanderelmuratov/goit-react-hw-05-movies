@@ -55,6 +55,20 @@ export const MovieTitle = styled.h3`
   font-weight: 400;  
 `;
 
+export const MovieMeta = styled.div`
+  display: flex;
+  gap: 15px;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+  
+  span {
+    background: #e0e0e0;
+    padding: 2px 8px;
+    border-radius: 4px;
+  }
+`;
+
 export const BadgesContainer = styled.div`
   display: flex;
   flex-wrap: wrap;
