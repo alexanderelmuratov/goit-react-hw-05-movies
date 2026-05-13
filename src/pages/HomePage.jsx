@@ -27,26 +27,58 @@ const FilterForm = styled.form`
   }
 `;
 
+const LoadMoreBtn = styled.button`
+  display: block;
+  margin: 30px auto;
+  padding: 12px 24px;
+  background-color: #ff6b01;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: #e56000;
+  }
+`;
+
 export const HomePage = () => {
   const [movies, setMovies] = useState([]);
   const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
 
   const [searchTitle, setSearchTitle] = useState('');
   const [searchGenre, setSearchGenre] = useState('');
   const [searchYear, setSearchYear] = useState('');
 
+  // Fetch genres once on mount
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchGenres = async () => {
+      try {
+        const genresData = await getMovieGenres();
+        setGenres(genresData.genres);
+      } catch (error) {
+        console.error("Failed to load genres", error);
+      }
+    };
+    fetchGenres();
+  }, []);
+
+  // Fetch movies when page changes
+  useEffect(() => {
+    const fetchMovies = async () => {
       setLoading(true);
       try {
-        const [moviesData, genresData] = await Promise.all([
-          getTrendingMovies(),
-          getMovieGenres()
-        ]);
-        setMovies(moviesData.results);
-        setGenres(genresData.genres);
+        const moviesData = await getTrendingMovies(page);
+        setMovies(prev => [...prev, ...moviesData.results]);
+        setTotalPages(moviesData.total_pages);
       } catch (error) {
         setError(error);
         toast.error('Oops!...Something went wrong');
@@ -54,8 +86,8 @@ export const HomePage = () => {
         setLoading(false);
       }      
     };
-    fetchData();
-  }, []);
+    fetchMovies();
+  }, [page]);
 
   const filteredMovies = useMemo(() => {
     return movies.filter(movie => {
@@ -65,6 +97,10 @@ export const HomePage = () => {
       return matchTitle && matchGenre && matchYear;
     });
   }, [movies, searchTitle, searchGenre, searchYear]);
+
+  const handleLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
+  };
 
   return (
     <>
@@ -94,9 +130,13 @@ export const HomePage = () => {
         />
       </FilterForm>
 
+      {movies.length !== 0 && <MoviesList movies={filteredMovies} />}
       {loading && <Loader />}
-      {!error && filteredMovies.length !== 0 && <MoviesList movies={filteredMovies} />}
       {!error && !loading && filteredMovies.length === 0 && <p>No movies found.</p>}
+      
+      {!loading && page < totalPages && (
+        <LoadMoreBtn onClick={handleLoadMore}>Load More</LoadMoreBtn>
+      )}
     </>
   );
 };
