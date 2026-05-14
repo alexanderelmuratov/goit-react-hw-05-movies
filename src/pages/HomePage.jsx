@@ -125,6 +125,7 @@ export const HomePage = () => {
       const matchYear = searchYear === '' || (movie.release_date && movie.release_date.startsWith(searchYear));
       return matchTitle && matchGenre && matchYear;
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [movies, searchTitle, searchGenre, searchYear, showWatchLaterOnly, updateTrigger]);
 
   const handleLoadMore = () => {
